@@ -4,14 +4,19 @@ namespace App\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class CategoryController
+class CategoryController extends AbstractController
 {
     /**
      * @Route("/category")
      */
     public function index()
     {
-        return new Response('SCP Сосааать');
+        $count = 1;
+
+        return $this->render('category.html.twig', [
+            'count' => $count,
+        ]);
     }
 }
