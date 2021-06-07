@@ -14,6 +14,8 @@ class Category
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @ORM\ManyToMany(targetEntity="Category", inversedBy="Product")
+     * @ORM\JoinTable(name="category_product")
      */
     private $id;
 

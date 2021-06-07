@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Uid\UuidV4;
 
 /**
  * @ORM\Entity(repositoryClass=ProductRepository::class)
@@ -13,15 +13,10 @@ class Product
 {
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue
      * @ORM\Column(type="uuid", unique="true")
      */
-    private $id;
+    private $uuid;
 
-    public function __construct()
-    {
-        $this->id = Uuid::v4();
-    }
     /**
      * @ORM\Column(type="string", length=255)
      */
@@ -33,13 +28,19 @@ class Product
     private $previewPicture;
 
     /**
-     * @ORM\Column(type="binary")
+     * @ORM\Column(type="boolean", options={"default" : 1})
      */
-    private $enabled;
+    private $enabled = 1;
 
-    public function getId(): ?Uuid
+
+    public function __construct()
     {
-        return $this->id;
+        $this->uuid = UuidV4::v4();
+    }
+
+    public function getUuid(): ?UuidV4
+    {
+        return $this->uuid;
     }
 
     public function getName(): ?string
