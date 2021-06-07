@@ -15,7 +15,9 @@
 </head>
 <body>
 {% block body %}
-    <h1>Количество категорий - {{ count }}</h1>
+    {% for category in category %}
+        <li><a href="#">{{ category.name }}</a></li>
+    {% endfor %}
 {% endblock %}
 </body>
 </html>
