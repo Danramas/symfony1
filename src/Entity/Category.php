@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CategoryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -14,8 +15,6 @@ class Category
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @ORM\ManyToMany(targetEntity="Category", inversedBy="Product")
-     * @ORM\JoinTable(name="category_product")
      */
     private $id;
 
@@ -28,6 +27,20 @@ class Category
      * @ORM\Column(type="string", length=255, nullable=true, unique=true)
      */
     private $slug;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="Product")
+     * @ORM\JoinTable(name="category_products",
+     *      joinColumns={@ORM\JoinColumn(name="category_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="product_uuid", referencedColumnName="uuid")}
+     *      )
+     */
+    private $products;
+
+    public function __construct()
+    {
+        $this->products = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -57,4 +70,18 @@ class Category
 
         return $this;
     }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getProducts(): ArrayCollection
+    {
+        return $this->products;
+    }
+
+    public function addProducts(Product $products)
+    {
+        $this->products[] = $products;
+    }
+
 }

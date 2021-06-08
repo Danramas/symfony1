@@ -3,6 +3,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Category;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -112,5 +113,28 @@ class ProductController extends AbstractController
         return $this->redirectToRoute('product', [
 
         ]);
+    }
+
+    /**
+     * @Route("/product/add/manytomany", name="manytomany")
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
+    public function manyToMany(EntityManagerInterface $entityManager)
+    {
+        $product = new Product();
+        $product->setName('Fan');
+        $entityManager->persist($product);
+
+        $category = new Category();
+        $category->setName('Cooling2');
+        $category->setSlug('Cooling2');
+        $category->addProducts($product);
+        $entityManager->persist($category);
+
+
+        $entityManager->flush();
+
+        return new Response('Продукт '.$product->getUuid().' добавлен в категорию '.$category->getId());
     }
 }

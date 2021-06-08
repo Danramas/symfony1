@@ -3,11 +3,13 @@
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\UuidV4;
 
 /**
  * @ORM\Entity(repositoryClass=ProductRepository::class)
+ * @ORM\Table(name="product")
  */
 class Product
 {
@@ -31,7 +33,6 @@ class Product
      * @ORM\Column(type="boolean", options={"default" : 1})
      */
     private $enabled = 1;
-
 
     public function __construct()
     {
