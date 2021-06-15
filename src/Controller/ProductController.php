@@ -4,7 +4,6 @@
 namespace App\Controller;
 
 use App\Entity\Category;
-use App\Form\ProductForm;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -35,30 +34,6 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @param EntityManagerInterface $entityManager
-     * @param ValidatorInterface $validator
-     * @return Response
-     * @Route("/product/create", name="createProduct")
-     */
-    public function create(EntityManagerInterface $entityManager, ValidatorInterface $validator)
-    {
-        $product = new Product();
-        $product->setName('Audi');
-        $product->setEnabled(true);
-
-        $category = new Category();
-        $category->setName('Auto2');
-        $category->setSlug('Auto2');
-        $category->addProduct($product);
-        $entityManager->persist($category);
-        $entityManager->persist($product);
-
-        $entityManager->flush();
-
-        return new Response('Продукт '.$product->getUuid().' добавлен в категорию '.$category->getName());
-    }
-
-    /**
      * @Route("/product/add", name="addProduct")
      * @param Request $request
      * @param EntityManagerInterface $entityManager
@@ -79,11 +54,13 @@ class ProductController extends AbstractController
             ->add('category', CollectionType::class, [
                 'entry_type'   => ChoiceType::class,
                 'entry_options'  => [
+                    'multiple' => true,
                     'choices'  => $categories
                     ],
                     'data' => [
                         $categories
                     ],
+
 
                 ]
             )

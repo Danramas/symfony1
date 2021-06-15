@@ -41,31 +41,6 @@ class CategoryController extends AbstractController
     }
 
     /**
-     * @param EntityManagerInterface $entityManager
-     * @param ValidatorInterface $validator
-     * @return Response
-     * @Route("/category/create", name="createCategory")
-     */
-    public function create(EntityManagerInterface $entityManager, ValidatorInterface $validator)
-    {
-        $category = new Category();
-
-        $category->setName('Computers');
-        $category->setSlug('Computers');
-
-        $errors = $validator->validate($category);
-        if (count($errors) > 0) {
-            return new Response((string) $errors, 400);
-        }
-
-        $entityManager->persist($category);
-        $entityManager->flush();
-
-
-        return new Response('Создана новая категория: '.$category->getName());
-    }
-
-    /**
      * @Route("/category/add", name="addCategory")
      * @param Request $request
      * @param EntityManagerInterface $entityManager
@@ -124,7 +99,6 @@ class CategoryController extends AbstractController
             'category' => $category,
             'products' => $products,
         ]);
-       // return new Response($category->getName());
     }
 
     /**

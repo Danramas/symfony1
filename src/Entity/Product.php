@@ -91,22 +91,6 @@ class Product
 
         return $this;
     }
-//
-//    /**
-//     * @return ArrayCollection
-//     */
-//    public function getCategory()
-//    {
-//        return $this->category;
-//    }
-//
-//    /**
-//     * @param Category $category
-//     */
-//    public function addCategory(Category $category): void
-//    {
-//        $this->category[] = $category;
-//    }
 
     /**
      * @return ArrayCollection
@@ -122,9 +106,6 @@ class Product
             $this->category[] = $category;
             $category->addProduct($this);
         }
-//        $category->addProduct($this);
-//
-//        $this->category[] = $category;
     }
 
     public function removeCategory(Category $category){

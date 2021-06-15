@@ -77,21 +77,6 @@ class Category
         return $this;
     }
 
-//    /**
-//     * @return ArrayCollection
-//     */
-//    public function getProduct()
-//    {
-//        return $this->product;
-//    }
-//
-//    public function joinProduct(Product $product): void
-//    {
-//        $product->addCategory($this);
-//
-//        $this->product[] = $product;
-//    }
-
     /**
      * @return ArrayCollection
      */
