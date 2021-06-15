@@ -6,6 +6,8 @@ use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\UuidV4;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 /**
  * @ORM\Entity(repositoryClass=ProductRepository::class)
@@ -21,21 +23,31 @@ class Product
 
     /**
      * @ORM\Column(type="string", length=255)
+     *
+     * @Assert\NotBlank()
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     *
+     * @Assert\File(mimeTypes={"image/png", "image/jpg", "image/gif", "image/jpeg",})
      */
     private $previewPicture;
 
     /**
      * @ORM\Column(type="boolean", options={"default" : 1})
      */
-    private $enabled = 1;
+    private $enabled;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="Category", mappedBy="product", cascade={"persist"})
+     */
+    private $category;
 
     public function __construct()
     {
+        $this->category = new ArrayCollection();
         $this->uuid = UuidV4::v4();
     }
 
@@ -78,5 +90,49 @@ class Product
         $this->enabled = $enabled;
 
         return $this;
+    }
+//
+//    /**
+//     * @return ArrayCollection
+//     */
+//    public function getCategory()
+//    {
+//        return $this->category;
+//    }
+//
+//    /**
+//     * @param Category $category
+//     */
+//    public function addCategory(Category $category): void
+//    {
+//        $this->category[] = $category;
+//    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getCategory()
+    {
+        return $this->category;
+    }
+
+    public function addCategory(Category $category): void
+    {
+        if (!$this->category->contains($category)) {
+            $this->category[] = $category;
+            $category->addProduct($this);
+        }
+//        $category->addProduct($this);
+//
+//        $this->category[] = $category;
+    }
+
+    public function removeCategory(Category $category){
+        if ($this->category->contains($category)) {
+            $this->category->removeElement($category);
+            if ($category->addProduct($this) === $this) {
+                $category->addProduct(null);
+            }
+        }
     }
 }

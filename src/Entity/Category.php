@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 /**
  * @ORM\Entity(repositoryClass=CategoryRepository::class)
@@ -20,26 +22,30 @@ class Category
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     *
+     * @Assert\NotBlank()
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true, unique=true)
+     *
+     * @Assert\NotBlank()
      */
     private $slug;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Product")
+     * @ORM\ManyToMany(targetEntity="Product" ,cascade={"persist"})
      * @ORM\JoinTable(name="category_products",
      *      joinColumns={@ORM\JoinColumn(name="category_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="product_uuid", referencedColumnName="uuid")}
      *      )
      */
-    private $products;
+    private $product;
 
     public function __construct()
     {
-        $this->products = new ArrayCollection();
+        $this->product = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -71,17 +77,53 @@ class Category
         return $this;
     }
 
+//    /**
+//     * @return ArrayCollection
+//     */
+//    public function getProduct()
+//    {
+//        return $this->product;
+//    }
+//
+//    public function joinProduct(Product $product): void
+//    {
+//        $product->addCategory($this);
+//
+//        $this->product[] = $product;
+//    }
+
     /**
      * @return ArrayCollection
      */
-    public function getProducts(): ArrayCollection
+    public function getProduct()
     {
-        return $this->products;
+        return $this->product;
     }
 
-    public function addProducts(Product $products)
+    /**
+     * @param Product $product
+     */
+    public function addProduct(Product $product)
     {
-        $this->products[] = $products;
+        if (!$this->product->contains($product)) {
+            $this->product[] = $product;
+            $product->addCategory($this);
+        }
+
+    }
+    public function __toString()
+    {
+        return $this->name;
+    }
+
+    public function removeProduct(Product $product)
+    {
+        if ($this->product->contains($product)) {
+            $this->product->removeElement($product);
+            if ($product->getCategory() === $this) {
+                $product->addCategory(null);
+            }
+        }
     }
 
 }

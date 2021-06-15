@@ -2,25 +2,41 @@
 
 namespace App\Controller;
 
+use App\Entity\Product;
+use App\Form\CategoryFormType;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Entity\Category;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class CategoryController extends AbstractController
 {
     /**
-     * @Route("/category", name="category")
+     * @Route("/", name="category")
      */
     public function index()
     {
-        $category = $this->getDoctrine()->getRepository(Category::class)->findAll();
+        $categories = $this->getDoctrine()->getRepository(Category::class)->findAll();
+        $count = [];
 
-        return $this->render('category.html.twig', [
-            'category' => $category,
+        foreach ($categories as $category)
+        {
+            $products = $category->getProduct();
+            $count += [
+                $category->getName() => count($products)
+            ];
+        }
+
+        return $this->render('index.html.twig', [
+            'categories' => $categories,
+            'count' => $count
         ]);
     }
 
@@ -50,35 +66,65 @@ class CategoryController extends AbstractController
     }
 
     /**
-     * @Route("/category/{slug}", name="showCategory")
+     * @Route("/category/add", name="addCategory")
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
+    public function add(Request $request, EntityManagerInterface $entityManager)
+    {
+        $category = new Category();
+
+        $form = $this->createForm(CategoryFormType::class, $category);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $category = $form->getData();
+
+            $entityManager->persist($category);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('addCategory');
+        }
+        return $this->render('categoryForm.html.twig', array(
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
+     * @Route("/{slug}", name="showCategory")
      * @param $slug
      * @return Response
      */
     public function show($slug)
     {
         $category = $this->getDoctrine()->getRepository(Category::class)->findOneBy(["slug" => $slug]);
+        $allProducts = $category->getProduct();
+
+        $products = [];
+
+        foreach ($allProducts as $product)
+        {
+            $fileName_tmp = $product->getPreviewPicture();
+            $fileName = $_SERVER['DOCUMENT_ROOT'].'uploads\previewPictures\\'.$fileName_tmp;
+
+            $product->setPreviewPicture($fileName);
+
+            if($product->getEnabled() == true){
+                array_push($products, $product);
+            }
+        }
 
         if (!$category) {
             return $this->redirectToRoute('category');
         }
 
-        return new Response($category->getName());
-    }
-
-    /**
-     * @Route("/category/{id}", name="showCategory")
-     * @param $id
-     * @return Response
-     */
-    public function showById($id)
-    {
-        $category = $this->getDoctrine()->getRepository(Category::class)->find($id);
-
-        if (!$category) {
-            return $this->redirectToRoute('category');
-        }
-
-        return new Response($category->getName());
+        return $this->render('category.html.twig', [
+            'category' => $category,
+            'products' => $products,
+        ]);
+       // return new Response($category->getName());
     }
 
     /**

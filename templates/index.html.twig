@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Welcome!{% endblock %}</title>
+    {# Run `composer require symfony/webpack-encore-bundle`
+       and uncomment the following Encore helpers to start using Symfony UX #}
+    {% block stylesheets %}
+        {#{{ encore_entry_link_tags('app') }}#}
+    {% endblock %}
+
+    {% block javascripts %}
+        {#{{ encore_entry_script_tags('app') }}#}
+    {% endblock %}
+</head>
+<body>
+{% block body %}
+    <div>
+        <a href="/product/add">Добавить продукт</a>
+        <a href="/category/add">Добавить категорию</a>
+        <a href="/admin">Админка</a>
+    </div>
+
+    {% block category %}
+        {% for key, value in count %}
+            {% for category in categories %}
+                {% if key == category.name %}
+                    <li><a href="/{{ category.slug }}">{{ category.name }}</a> ({{ value }})</li>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endblock %}
+
+{% endblock %}
+</body>
+</html>

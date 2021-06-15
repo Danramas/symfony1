@@ -4,7 +4,15 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Form\ProductForm;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,10 +27,10 @@ class ProductController extends AbstractController
      */
     public function index()
     {
-        $product = $this->getDoctrine()->getRepository(Product::class)->findAll();
+        $products = $this->getDoctrine()->getRepository(Product::class)->findAll();
 
         return $this->render('product.html.twig', [
-            'product' => $product,
+            'products' => $products,
         ]);
     }
 
@@ -35,36 +43,99 @@ class ProductController extends AbstractController
     public function create(EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
         $product = new Product();
+        $product->setName('Audi');
+        $product->setEnabled(true);
 
-        $product->setName('Asus');
-
-        $errors = $validator->validate($product);
-        if (count($errors) > 0) {
-            return new Response((string) $errors, 400);
-        }
-
+        $category = new Category();
+        $category->setName('Auto2');
+        $category->setSlug('Auto2');
+        $category->addProduct($product);
+        $entityManager->persist($category);
         $entityManager->persist($product);
+
         $entityManager->flush();
 
-
-        return new Response('Добавлен новый продукт: '.$product->getName());
+        return new Response('Продукт '.$product->getUuid().' добавлен в категорию '.$category->getName());
     }
 
     /**
-     * @Route("/product/{uuid}", name="showProduct")
+     * @Route("/product/add", name="addProduct")
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @return RedirectResponse|Response
+     */
+    public function add(Request $request, EntityManagerInterface $entityManager)
+    {
+        $product = new Product();
+
+        $categories = $this->getDoctrine()->getRepository(Category::class)->findAll();
+
+        //$form = $this->createForm(ProductForm::class, $product);
+
+        $form = $this->createFormBuilder($product)
+            ->add('name', TextType::class)
+            ->add('previewPicture', FileType::class, array('required' => false))
+            ->add('enabled', CheckboxType::class, array('required' => false))
+            ->add('category', CollectionType::class, [
+                'entry_type'   => ChoiceType::class,
+                'entry_options'  => [
+                    'choices'  => $categories
+                    ],
+                    'data' => [
+                        $categories
+                    ],
+
+                ]
+            )
+            ->add('save', SubmitType::class, array('label' => 'Добавить продукт'))
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            /** @var Symfony\Component\HttpFoundation\File\UploadedFile $file */
+            $file = $form->get('previewPicture')->getData();
+
+            $product = $form->getData();
+
+            $fileName = $this->generateUniqueFileName().'.'.$file->guessExtension();
+
+            $file->move(
+                $this->getParameter('previewPictureDirectory'),
+                $fileName
+            );
+
+            $product->setPreviewPicture($fileName);
+
+            $entityManager->persist($product);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('addProduct');
+        }
+        return $this->render('productForm.html.twig', array(
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
+     * @Route("/{slug}/{uuid}", name="showProduct")
      * @param $uuid
+     * @param $slug
      * @return Response
      */
-    public function show($uuid)
+    public function show($uuid, $slug)
     {
         $product = $this->getDoctrine()->getRepository(Product::class)->findOneBy(['uuid' => $uuid]);
         $product = $this->getDoctrine()->getRepository(Product::class)->find($uuid);
 
-        if (!$product) {
+        if (!$product || $product->getEnabled() == false) {
             return $this->redirectToRoute('product');
         }
 
-        return new Response($product->getName());
+        return $this->render('product.html.twig', [
+            'product' => $product,
+        ]);
     }
 
     /**
@@ -116,25 +187,10 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/product/add/manytomany", name="manytomany")
-     * @param EntityManagerInterface $entityManager
-     * @return Response
+     * @return string
      */
-    public function manyToMany(EntityManagerInterface $entityManager)
+    private function generateUniqueFileName()
     {
-        $product = new Product();
-        $product->setName('Fan');
-        $entityManager->persist($product);
-
-        $category = new Category();
-        $category->setName('Cooling2');
-        $category->setSlug('Cooling2');
-        $category->addProducts($product);
-        $entityManager->persist($category);
-
-
-        $entityManager->flush();
-
-        return new Response('Продукт '.$product->getUuid().' добавлен в категорию '.$category->getId());
+        return md5(uniqid());
     }
 }

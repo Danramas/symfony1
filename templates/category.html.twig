@@ -15,8 +15,14 @@
 </head>
 <body>
 {% block body %}
-    {% for category in category %}
-        <li><a href="#">{{ category.name }}</a></li>
+        {{ category.name }}
+    {% for product in products %}
+        <li>
+            <a href="/{{ category.slug }}/{{ product.uuid }}">
+                <img src="{{ product.previewPicture }}" alt="previewPicture" width="100px" height="100px">
+                {{ product.name }}
+            </a>
+        </li>
     {% endfor %}
 {% endblock %}
 </body>
