@@ -108,7 +108,7 @@ class ProductController extends AbstractController
         $product->setPreviewPicture($fileName);
 
         if (!$product || $product->getEnabled() == false) {
-            return $this->redirectToRoute('product');
+            return $this->redirectToRoute('category');
         }
 
         return $this->render('product.html.twig', [
