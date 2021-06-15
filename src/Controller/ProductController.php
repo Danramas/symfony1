@@ -45,8 +45,6 @@ class ProductController extends AbstractController
 
         $categories = $this->getDoctrine()->getRepository(Category::class)->findAll();
 
-        //$form = $this->createForm(ProductForm::class, $product);
-
         $form = $this->createFormBuilder($product)
             ->add('name', TextType::class)
             ->add('previewPicture', FileType::class, array('required' => false))
