@@ -101,8 +101,11 @@ class ProductController extends AbstractController
      */
     public function show($uuid, $slug)
     {
-        $product = $this->getDoctrine()->getRepository(Product::class)->findOneBy(['uuid' => $uuid]);
         $product = $this->getDoctrine()->getRepository(Product::class)->find($uuid);
+
+        $fileName_tmp = $product->getPreviewPicture();
+        $fileName = $_SERVER['DOCUMENT_ROOT'].'uploads\previewPictures\\'.$fileName_tmp;
+        $product->setPreviewPicture($fileName);
 
         if (!$product || $product->getEnabled() == false) {
             return $this->redirectToRoute('product');
