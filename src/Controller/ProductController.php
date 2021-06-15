@@ -52,7 +52,7 @@ class ProductController extends AbstractController
             ->add('category', CollectionType::class, [
                 'entry_type'   => ChoiceType::class,
                 'entry_options'  => [
-                    'multiple' => true,
+                    //'multiple' => true,
                     'choices'  => $categories
                     ],
                     'data' => [
