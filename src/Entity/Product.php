@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\UuidV4;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\Collection;
 
 
 /**
@@ -93,9 +94,9 @@ class Product
     }
 
     /**
-     * @return ArrayCollection
+     * @return Collection
      */
-    public function getCategory()
+    public function getCategory(): Collection
     {
         return $this->category;
     }

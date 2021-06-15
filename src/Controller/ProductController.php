@@ -18,6 +18,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Entity\Product;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Form\ChoiceList\ChoiceList;
+
 
 class ProductController extends AbstractController
 {
@@ -49,19 +51,29 @@ class ProductController extends AbstractController
             ->add('name', TextType::class)
             ->add('previewPicture', FileType::class, array('required' => false))
             ->add('enabled', CheckboxType::class, array('required' => false))
+            /* Тут 2 проблемы: если использовать этот код, то появляется на форме лишний label, и категории показываются ключами в коллекции
+            и я не совсем понимаю как сделать нормальные имена, но при этом всё работает, связи создаются*/
             ->add('category', CollectionType::class, [
-                'entry_type'   => ChoiceType::class,
+                'entry_type' => ChoiceType::class,
                 'entry_options'  => [
-                    //'multiple' => true,
-                    'choices'  => $categories
+                    'choices'  => $categories,
+                    'choice_value' => 'name',
+                    // Если убрать это то там будет новя строка и "0"
+                    'label' => 'Category',
                     ],
                     'data' => [
-                        $categories
+                        ""
                     ],
-
-
                 ]
             )
+            /* А вот этот код исправляет проблему с лишним label, но появляется ошибка что даётся не тот тип, нужен array или Traversable */
+//            ->add('category', ChoiceType::class, [
+//                    //'multiple' => true,
+//                    //'expanded' => true,
+//                    'choices'  => $categories,
+//                    //'choice_value' => 'name',
+//                ]
+//            )
             ->add('save', SubmitType::class, array('label' => 'Добавить продукт'))
             ->getForm();
 

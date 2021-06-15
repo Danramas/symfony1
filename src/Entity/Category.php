@@ -6,6 +6,7 @@ use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\Collection;
 
 
 /**
@@ -78,9 +79,9 @@ class Category
     }
 
     /**
-     * @return ArrayCollection
+     * @return Collection
      */
-    public function getProduct()
+    public function getProduct(): Collection
     {
         return $this->product;
     }
