@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\Category;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -53,17 +54,12 @@ class ProductController extends AbstractController
             ->add('enabled', CheckboxType::class, array('required' => false))
             /* Тут 2 проблемы: если использовать этот код, то появляется на форме лишний label, и категории показываются ключами в коллекции
             и я не совсем понимаю как сделать нормальные имена, но при этом всё работает, связи создаются*/
-            ->add('category', CollectionType::class, [
-                'entry_type' => ChoiceType::class,
-                'entry_options'  => [
-                    'choices'  => $categories,
-                    'choice_value' => 'name',
+            ->add('category', EntityType::class, [
+                'class' => Category::class,
+
+                    'choice_name' => 'name',
                     // Если убрать это то там будет новя строка и "0"
                     'label' => 'Category',
-                    ],
-                    'data' => [
-                        ""
-                    ],
                 ]
             )
             /* А вот этот код исправляет проблему с лишним label, но появляется ошибка что даётся не тот тип, нужен array или Traversable */
